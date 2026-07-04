@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { DATABASE_HOST, DATABASE_NAME, DATABASE_PASSWORD, DATABASE_PORT, DATABASE_USERNAME } from './config';
+import { DATABASE_HOST, DATABASE_NAME, DATABASE_PASSWORD, DATABASE_PORT, DATABASE_USERNAME } from '../config';
 
 
 export const dataSourceOptions: DataSourceOptions = {
@@ -10,6 +10,8 @@ export const dataSourceOptions: DataSourceOptions = {
     username: DATABASE_USERNAME,
     password: DATABASE_PASSWORD,
     database: DATABASE_NAME,
+    entities: [`${__dirname}/../**/**.entity{.ts,.js}`],
+    synchronize: true // don't use in production
 }
 
 const dataSource = new DataSource(dataSourceOptions)
