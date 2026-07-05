@@ -13,3 +13,4 @@ export const DATABASE_NAME = process.env.POSTGRES_DB;
 export const DATABASE_PASSWORD = process.env.POSTGRES_PASSWORD;
 export const DATABASE_USERNAME = process.env.DATABASE_USERNAME;
 export const PORT = process.env.PORT ?? 3000;
+export const JWT_SECRET = process.env.JWT_SECRET;

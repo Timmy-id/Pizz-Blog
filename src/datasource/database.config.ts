@@ -11,7 +11,9 @@ export const dataSourceOptions: DataSourceOptions = {
     password: DATABASE_PASSWORD,
     database: DATABASE_NAME,
     entities: [`${__dirname}/../**/**.entity{.ts,.js}`],
-    synchronize: true // don't use in production
+    migrationsTableName: 'migrations',
+    migrations: [`${__dirname}/migrations/**/*.ts`],
+    synchronize: true
 }
 
 const dataSource = new DataSource(dataSourceOptions)
