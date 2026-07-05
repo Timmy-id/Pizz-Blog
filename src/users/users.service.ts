@@ -7,6 +7,8 @@ import { CreateUserDto } from './dto/createUser.dto';
 import { UsersEntity } from './users.entity';
 import { IUserResponse } from './types/usersResponse.interface';
 import { JWT_SECRET } from '@/config';
+import { LoginUserDto } from './dto/loginUser.dto';
+import { compare } from 'bcryptjs'
 
 @Injectable()
 export class UsersService {
@@ -47,5 +49,31 @@ export class UsersService {
                 token: this.generateToken(user)
             }
         }
+    }
+
+    async findByEmail(email: string): Promise<UsersEntity | null> {
+        return await this.usersRepository.findOne({
+            where: { email }
+        })
+    }
+
+    async comparePassword(user: UsersEntity, password: string): Promise<boolean> {
+        return await compare(password, user.password)
+    }
+
+    async loginUser(loginUserDto: LoginUserDto): Promise<IUserResponse> {
+        const user = await this.findByEmail(loginUserDto.email)
+
+        if (!user) {
+            throw new HttpException("Invalid credentials", HttpStatus.BAD_REQUEST)
+        }
+
+        const isPasswordValid = await this.comparePassword(user, loginUserDto.password)
+
+        if (!isPasswordValid) {
+            throw new HttpException("Invalid credentials", HttpStatus.BAD_REQUEST)
+        }
+
+        return this.generateUserResponse(user)
     }
 }
