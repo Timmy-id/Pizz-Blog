@@ -43,6 +43,10 @@ export class UsersService {
     }
 
     generateUserResponse(user: UsersEntity): IUserResponse {
+        if (!user.id) {
+            throw new HttpException("User data missing", HttpStatus.BAD_REQUEST)
+        }
+
         return {
             user: {
                 ...user,
@@ -55,6 +59,18 @@ export class UsersService {
         return await this.usersRepository.findOne({
             where: { email }
         })
+    }
+
+    async findById(id: string): Promise<UsersEntity | null> {
+        const user = await this.usersRepository.findOne({
+            where: {id}
+        })
+
+        if (!user) {
+            throw new HttpException('User not found', HttpStatus.NOT_FOUND)
+        }
+
+        return user
     }
 
     async comparePassword(user: UsersEntity, password: string): Promise<boolean> {
