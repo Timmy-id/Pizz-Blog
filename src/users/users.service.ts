@@ -58,22 +58,25 @@ export class UsersService {
     }
 
     async comparePassword(user: UsersEntity, password: string): Promise<boolean> {
-        return await compare(password, user.password)
+        return compare(password, user.password)
     }
 
     async loginUser(loginUserDto: LoginUserDto): Promise<IUserResponse> {
         const user = await this.findByEmail(loginUserDto.email)
 
         if (!user) {
-            throw new HttpException("Invalid credentials", HttpStatus.BAD_REQUEST)
+            throw new HttpException("Invalid credentials", HttpStatus.UNAUTHORIZED)
         }
 
         const isPasswordValid = await this.comparePassword(user, loginUserDto.password)
 
         if (!isPasswordValid) {
-            throw new HttpException("Invalid credentials", HttpStatus.BAD_REQUEST)
+            throw new HttpException("Invalid credentials", HttpStatus.UNAUTHORIZED)
         }
 
-        return this.generateUserResponse(user)
+        const { password, ...result } = user
+        void password
+
+        return this.generateUserResponse(result as UsersEntity)
     }
 }
