@@ -8,7 +8,7 @@ import { UsersEntity } from './users.entity';
 import { IUserResponse } from './types/usersResponse.interface';
 import { JWT_SECRET } from '@/config';
 import { LoginUserDto } from './dto/loginUser.dto';
-import { compare } from 'bcryptjs'
+import { hash, compare, genSalt } from 'bcryptjs'
 
 @Injectable()
 export class UsersService {
@@ -29,7 +29,11 @@ export class UsersService {
             throw new HttpException("Username or Email already taken", HttpStatus.UNPROCESSABLE_ENTITY)
         }
 
-        const savedUser = await this.usersRepository.save(newUser)
+        const salt = await genSalt(10)
+
+        const hashPassword = await hash(createUserDto.password, salt)
+
+        const savedUser = await this.usersRepository.save({ ...newUser, password: hashPassword })
         return this.generateUserResponse(savedUser)
     }
 
