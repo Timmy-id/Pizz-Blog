@@ -1,6 +1,8 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { ArticleEntity } from "@/article/article.entity";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 
 @Entity({name: 'users'})
@@ -22,4 +24,7 @@ export class UsersEntity {
 
     @Column({default: ''})
     image: string;
+
+    @OneToMany(() => ArticleEntity, (article) => article.author)
+    articles: ArticleEntity[]
 }

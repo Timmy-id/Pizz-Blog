@@ -6,9 +6,10 @@ import { TagsModule } from './tags/tags.module';
 import { TypeOrmModule } from './datasource/typeorm.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { ArticleModule } from './article/article.module';
 
 @Module({
-  imports: [TypeOrmModule, TagsModule, UsersModule, AuthModule],
+  imports: [TypeOrmModule, TagsModule, UsersModule, AuthModule, ArticleModule],
   controllers: [AppController],
   providers: [AppService],
 })
