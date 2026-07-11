@@ -1,11 +1,14 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { UsersEntity } from '@/users/users.entity';
 import { Injectable } from '@nestjs/common';
-import { CreateArticleDto } from './dto/createArticle.dto';
-import { ArticleEntity } from './article.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import slugify from 'slugify';
+import { UsersEntity } from '@/users/users.entity';
+import { CreateArticleDto } from './dto/createArticle.dto';
+import { ArticleEntity } from './article.entity';
+import { IArticleResponse } from './types/articleResponse.interface';
 
 @Injectable()
 export class ArticleService {
@@ -14,7 +17,7 @@ export class ArticleService {
     private readonly articleRepository: Repository<ArticleEntity>
 ) {}
 
-  async createArticle(user: UsersEntity, createArticleDto: CreateArticleDto): Promise<ArticleEntity> {
+  async createArticle(user: UsersEntity, createArticleDto: CreateArticleDto): Promise<IArticleResponse> {
     const article = new ArticleEntity();
 
     Object.assign(article, createArticleDto)
@@ -23,9 +26,19 @@ export class ArticleService {
         article.tagList = []
     }
 
-    article.slug = 'slug-test'
+    article.slug = this.generateSlug(article.title)
     article.author = user;
 
-    return await this.articleRepository.save(article)
+    const newArticle = await this.articleRepository.save(article)
+    return this.generateArticleResponse(newArticle)
+  }
+
+  generateSlug(title: string): string {
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2)
+    return `${slugify(title, { lower: true })}-${id}`
+  }
+
+  generateArticleResponse(article: ArticleEntity): IArticleResponse {
+    return { article }
   }
 }
