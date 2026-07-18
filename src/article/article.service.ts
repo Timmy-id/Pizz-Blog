@@ -9,6 +9,7 @@ import { UsersEntity } from '@/users/users.entity';
 import { CreateArticleDto } from './dto/createArticle.dto';
 import { ArticleEntity } from './article.entity';
 import { IArticleResponse } from './types/articleResponse.interface';
+import { UpdateArticleDto } from './dto/updateArticle.dto';
 
 @Injectable()
 export class ArticleService {
@@ -52,6 +53,23 @@ export class ArticleService {
     }
     
     return await this.articleRepository.delete({ slug })
+  }
+
+  async updateArticle(slug: string, currentUserId: string, updateArticleDto: UpdateArticleDto): Promise<IArticleResponse> {
+    const article = await this.findArticleBySlug(slug)
+
+    if (article.author.id !== currentUserId) {
+        throw new HttpException('Only the author can update this article', HttpStatus.FORBIDDEN)
+    }
+
+    if (updateArticleDto.title) {
+        article.slug = this.generateSlug(updateArticleDto.title)
+    }
+
+    Object.assign(article, updateArticleDto)
+
+    const newArticle = await this.articleRepository.save(article)
+    return this.generateArticleResponse(newArticle)
   }
 
   async findArticleBySlug(slug: string): Promise<ArticleEntity> {

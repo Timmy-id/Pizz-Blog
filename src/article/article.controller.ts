@@ -3,11 +3,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { User } from '@/users/decorators/users.decorator';
 import { UsersEntity } from '@/users/users.entity';
-import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { CreateArticleDto } from './dto/createArticle.dto';
 import { ArticleService } from './article.service';
 import { AuthGuard } from '@/auth/guards/auth.guard';
 import { IArticleResponse } from './types/articleResponse.interface';
+import { UpdateArticleDto } from './dto/updateArticle.dto';
 
 @Controller('articles')
 export class ArticleController {
@@ -29,5 +30,11 @@ export class ArticleController {
   @UseGuards(AuthGuard)
   async deleteArticle(@Param('slug') slug: string, @User('id') currentUserId: string) {
     return await this.articleService.deleteArticle(slug, currentUserId)
+  }
+
+  @Put(':slug')
+  @UseGuards(AuthGuard)
+  async updateArticle(@Param('slug') slug: string, @User('id') currentUserId: string, @Body('article') updateArticleDto: UpdateArticleDto) {
+    return await this.articleService.updateArticle(slug, currentUserId, updateArticleDto)
   }
 }
