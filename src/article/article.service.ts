@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import slugify from 'slugify';
@@ -36,6 +36,26 @@ export class ArticleService {
   generateSlug(title: string): string {
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2)
     return `${slugify(title, { lower: true })}-${id}`
+  }
+
+  async getSingleArticle(slug: string): Promise<IArticleResponse> {
+    const article = await this.articleRepository.findOne({
+        where: { slug },
+        relations: { author: true },
+        select: {
+            author: {
+                id: true,
+                username: true,
+                email: true
+            }
+        }
+    })
+
+    if (!article) {
+        throw new HttpException('Artcle Not found', HttpStatus.NOT_FOUND)
+    }
+
+    return this.generateArticleResponse(article)
   }
 
   generateArticleResponse(article: ArticleEntity): IArticleResponse {
