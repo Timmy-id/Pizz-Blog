@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { User } from '@/users/decorators/users.decorator';
 import { UsersEntity } from '@/users/users.entity';
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { CreateArticleDto } from './dto/createArticle.dto';
 import { ArticleService } from './article.service';
 import { AuthGuard } from '@/auth/guards/auth.guard';
@@ -23,5 +23,11 @@ export class ArticleController {
   @UseGuards(AuthGuard)
   async getSingleArticle(@Param('slug') slug: string): Promise<IArticleResponse> {
     return await this.articleService.getSingleArticle(slug)
+  }
+
+  @Delete(':slug')
+  @UseGuards(AuthGuard)
+  async deleteArticle(@Param('slug') slug: string, @User('id') currentUserId: string) {
+    return await this.articleService.deleteArticle(slug, currentUserId)
   }
 }

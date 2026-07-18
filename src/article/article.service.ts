@@ -1,9 +1,9 @@
 /* eslint-disable prettier/prettier */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import slugify from 'slugify';
 import { UsersEntity } from '@/users/users.entity';
 import { CreateArticleDto } from './dto/createArticle.dto';
@@ -39,6 +39,22 @@ export class ArticleService {
   }
 
   async getSingleArticle(slug: string): Promise<IArticleResponse> {
+    const article = await this.findArticleBySlug(slug)
+
+    return this.generateArticleResponse(article)
+  }
+
+  async deleteArticle(slug: string, currentUserId: string): Promise<DeleteResult> {
+    const article = await this.findArticleBySlug(slug)
+
+    if (article.author.id !== currentUserId) {
+        throw new HttpException('Only the author can delete', HttpStatus.FORBIDDEN)
+    }
+    
+    return await this.articleRepository.delete({ slug })
+  }
+
+  async findArticleBySlug(slug: string): Promise<ArticleEntity> {
     const article = await this.articleRepository.findOne({
         where: { slug },
         relations: { author: true },
@@ -55,7 +71,7 @@ export class ArticleService {
         throw new HttpException('Artcle Not found', HttpStatus.NOT_FOUND)
     }
 
-    return this.generateArticleResponse(article)
+    return article
   }
 
   generateArticleResponse(article: ArticleEntity): IArticleResponse {
