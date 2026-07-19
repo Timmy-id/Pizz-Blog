@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { ArticleEntity } from "@/article/article.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 
 @Entity({name: 'users'})
@@ -24,6 +24,10 @@ export class UsersEntity {
 
     @Column({default: ''})
     image: string;
+
+    @ManyToMany(() => ArticleEntity)
+    @JoinTable()
+    favorites: ArticleEntity[]
 
     @OneToMany(() => ArticleEntity, (article) => article.author)
     articles: ArticleEntity[]

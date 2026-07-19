@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -112,6 +113,30 @@ export class ArticleService {
     const articles = await queryBuilder.getMany()
 
     return { articles, articlesCount }
+  }
+
+  async addToFavoriteArticle(slug: string, currentUserId: string): Promise<IArticleResponse> {
+    const user = await this.userRepository.findOne({
+        where: { id: currentUserId },
+        relations: { favorites: true }
+    })
+
+    if (!user) {
+        throw new HttpException("User not found", HttpStatus.NOT_FOUND)
+    }
+
+    const currentArticle = await this.findArticleBySlug(slug)
+
+    const isNotFavorited = !user.favorites.find((article) => article.slug === currentArticle.slug)
+    
+    if (isNotFavorited) {
+        currentArticle.favoriteCount++
+        user.favorites.push(currentArticle)
+        await this.articleRepository.save(currentArticle)
+        await this.userRepository.save(user)
+    }
+    
+    return this.generateArticleResponse(currentArticle)
   }
 
   async findArticleBySlug(slug: string): Promise<ArticleEntity> {
