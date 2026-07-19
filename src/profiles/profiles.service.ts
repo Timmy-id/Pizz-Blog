@@ -9,12 +9,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IProfileResponse } from './types/profileResponse.interface';
 import { ProfileType } from './types/profile.type';
+import { FollowEntity } from './follow.entity';
 
 @Injectable()
 export class ProfilesService {
   constructor(
     @InjectRepository(UsersEntity)
     private readonly userRepository: Repository<UsersEntity>,
+
+    @InjectRepository(FollowEntity)
+    private readonly followRepository: Repository<FollowEntity>,
   ) {}
 
   async getProfile(profileUsername: string): Promise<IProfileResponse> {
@@ -26,13 +30,43 @@ export class ProfilesService {
         throw new HttpException('Profile not found', HttpStatus.NOT_FOUND)
     }
 
-    delete profile?.password
-    delete profile?.email
+    return this.generateProfileResponse(profile)
+  }
 
+  async followProfile(currentUserId: string, followingUsername: string): Promise<IProfileResponse> {
+    const followingProfile = await this.userRepository.findOne({
+        where: { username: followingUsername }
+    })
+
+    if (!followingProfile) {
+        throw new HttpException('Profile does not exist', HttpStatus.NOT_FOUND)
+    }
+
+    if (currentUserId === followingProfile.id) {
+        throw new HttpException("You can't follow yourself", HttpStatus.BAD_REQUEST)
+    }
+
+    const follow = await this.followRepository.findOne({
+        where: { 
+            followerId: currentUserId,
+            followingId: followingProfile.id
+        }
+    })
+
+    if (!follow) {
+        const newFollow = new FollowEntity()
+        newFollow.followerId = currentUserId
+        newFollow.followingId = followingProfile.id
+        await this.followRepository.save(newFollow)
+    }
+    const profile = { ...followingProfile, following: true }
     return this.generateProfileResponse(profile)
   }
 
   generateProfileResponse(profile: UsersEntity): IProfileResponse {
+    delete profile?.password
+    delete profile?.email
+
     const profileResponse: ProfileType = {
       ...profile,
       following: false,
