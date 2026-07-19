@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
@@ -10,13 +11,16 @@ import { CreateArticleDto } from './dto/createArticle.dto';
 import { ArticleEntity } from './article.entity';
 import { IArticleResponse } from './types/articleResponse.interface';
 import { UpdateArticleDto } from './dto/updateArticle.dto';
+import { IArticlesResponse } from './types/articlesResponse.interface';
 
 @Injectable()
 export class ArticleService {
   constructor(
     @InjectRepository(ArticleEntity)
-    private readonly articleRepository: Repository<ArticleEntity>
-) {}
+    private readonly articleRepository: Repository<ArticleEntity>,
+    @InjectRepository(UsersEntity)
+    private readonly userRepository: Repository<UsersEntity>
+  ) {}
 
   async createArticle(user: UsersEntity, createArticleDto: CreateArticleDto): Promise<IArticleResponse> {
     const article = new ArticleEntity();
@@ -72,6 +76,44 @@ export class ArticleService {
     return this.generateArticleResponse(newArticle)
   }
 
+  async getAllArticles(query: any): Promise<IArticlesResponse> {
+    const queryBuilder = this.articleRepository
+        .createQueryBuilder('articles')
+        .leftJoinAndSelect('articles.author', 'author')
+
+    if (query.tag) {
+        queryBuilder.andWhere(':tag = ANY(articles.tagList)', {
+            tag: query.tag
+        })
+    }
+
+    if (query.author) {
+        const author = await this.userRepository.findOne({
+            where: { username: query.author }
+        })
+
+        queryBuilder.andWhere('articles.author = :id', {
+            id: author?.id
+        })
+    }
+
+    queryBuilder.orderBy('articles.createdAt', 'DESC')
+
+    const articlesCount = await queryBuilder.getCount()
+
+    if (query.limit) {
+        queryBuilder.limit(query.limit)
+    }
+
+    if (query.offset) {
+        queryBuilder.offset(query.offset)
+    }
+
+    const articles = await queryBuilder.getMany()
+
+    return { articles, articlesCount }
+  }
+
   async findArticleBySlug(slug: string): Promise<ArticleEntity> {
     const article = await this.articleRepository.findOne({
         where: { slug },
@@ -80,7 +122,8 @@ export class ArticleService {
             author: {
                 id: true,
                 username: true,
-                email: true
+                bio: true,
+                image: true
             }
         }
     })

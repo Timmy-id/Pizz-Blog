@@ -3,12 +3,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { User } from '@/users/decorators/users.decorator';
 import { UsersEntity } from '@/users/users.entity';
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { CreateArticleDto } from './dto/createArticle.dto';
 import { ArticleService } from './article.service';
 import { AuthGuard } from '@/auth/guards/auth.guard';
 import { IArticleResponse } from './types/articleResponse.interface';
 import { UpdateArticleDto } from './dto/updateArticle.dto';
+import { IArticlesResponse } from './types/articlesResponse.interface';
 
 @Controller('articles')
 export class ArticleController {
@@ -34,7 +35,12 @@ export class ArticleController {
 
   @Put(':slug')
   @UseGuards(AuthGuard)
-  async updateArticle(@Param('slug') slug: string, @User('id') currentUserId: string, @Body('article') updateArticleDto: UpdateArticleDto) {
+  async updateArticle(@Param('slug') slug: string, @User('id') currentUserId: string, @Body('article') updateArticleDto: UpdateArticleDto): Promise<IArticleResponse> {
     return await this.articleService.updateArticle(slug, currentUserId, updateArticleDto)
+  }
+
+  @Get()
+  async getAllArticles(@Query() query: any): Promise<IArticlesResponse> {
+    return await this.articleService.getAllArticles(query) 
   }
 }
