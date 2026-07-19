@@ -40,8 +40,8 @@ export class ArticleController {
   }
 
   @Get()
-  async getAllArticles(@Query() query: any): Promise<IArticlesResponse> {
-    return await this.articleService.getAllArticles(query) 
+  async getAllArticles(@User('id') currentUserId: string, @Query() query: any): Promise<IArticlesResponse> {
+    return await this.articleService.getAllArticles(currentUserId, query) 
   }
 
   @Post(':slug/favorite')

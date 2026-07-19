@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -77,7 +78,7 @@ export class ArticleService {
     return this.generateArticleResponse(newArticle)
   }
 
-  async getAllArticles(query: any): Promise<IArticlesResponse> {
+  async getAllArticles(currentUserId: string, query: any): Promise<IArticlesResponse> {
     const queryBuilder = this.articleRepository
         .createQueryBuilder('articles')
         .leftJoinAndSelect('articles.author', 'author')
@@ -98,6 +99,23 @@ export class ArticleService {
         })
     }
 
+    if (query.favorited) {
+        const author = await this.userRepository.findOne({
+            where: { username: query.favorited },
+            relations: { favorites: true }
+        })
+
+        if (!author || author.favorites.length === 0) {
+            return { articles: [], articlesCount: 0 }
+        }
+
+        const favoriteIds = author.favorites.map(articles => articles.id)
+
+        queryBuilder.andWhere('articles.id IN (:...ids)', {
+            ids: favoriteIds
+        })
+    }
+
     queryBuilder.orderBy('articles.createdAt', 'DESC')
 
     const articlesCount = await queryBuilder.getCount()
@@ -112,7 +130,23 @@ export class ArticleService {
 
     const articles = await queryBuilder.getMany()
 
-    return { articles, articlesCount }
+    let userFavoriteIds: string[] = []
+
+    if (currentUserId) {
+        const currentUser = await this.userRepository.findOne({
+            where: { id: currentUserId },
+            relations: { favorites: true }
+        })
+
+        userFavoriteIds = currentUser ? currentUser.favorites.map(article => article.id) : []
+    }
+
+    const articlesWithFavorited = articles.map((article) => {
+        const favorited = userFavoriteIds.includes(article.id)
+        return { ...article, favorited }
+    })
+
+    return { articles: articlesWithFavorited, articlesCount }
   }
 
   async addToFavoriteArticle(slug: string, currentUserId: string): Promise<IArticleResponse> {
