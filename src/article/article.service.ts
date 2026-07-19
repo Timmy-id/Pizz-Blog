@@ -139,6 +139,30 @@ export class ArticleService {
     return this.generateArticleResponse(currentArticle)
   }
 
+  async removeFromFavoriteArticle(slug: string, currentUserId: string): Promise<IArticleResponse> {
+     const user = await this.userRepository.findOne({
+        where: { id: currentUserId },
+        relations: { favorites: true }
+    })
+
+    if (!user) {
+        throw new HttpException("User not found", HttpStatus.NOT_FOUND)
+    }
+
+    const currentArticle = await this.findArticleBySlug(slug)
+
+    const articleIndex = user.favorites.findIndex(article => article.slug === currentArticle.slug)
+
+    if (articleIndex >= 0) {
+        currentArticle.favoriteCount--
+        user.favorites.splice(articleIndex, 1)
+        await this.articleRepository.save(currentArticle)
+        await this.userRepository.save(user)
+    }
+
+    return this.generateArticleResponse(currentArticle)
+  }
+
   async findArticleBySlug(slug: string): Promise<ArticleEntity> {
     const article = await this.articleRepository.findOne({
         where: { slug },
