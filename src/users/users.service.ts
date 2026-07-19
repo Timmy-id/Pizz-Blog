@@ -79,7 +79,7 @@ export class UsersService {
     }
 
     async comparePassword(user: UsersEntity, password: string): Promise<boolean> {
-        return compare(password, user.password)
+        return compare(password, user.password as string)
     }
 
     async loginUser(loginUserDto: LoginUserDto): Promise<IUserResponse> {
@@ -98,7 +98,7 @@ export class UsersService {
         const { password, ...result } = user
         void password
 
-        return this.generateUserResponse(result as UsersEntity)
+        return this.generateUserResponse(result)
     }
 
     async updateUser(userId: string, updateUserDto: UpdateUserDto) {

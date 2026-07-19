@@ -14,10 +14,10 @@ export class UsersEntity {
     username: string;
 
     @Column()
-    email: string;
+    email?: string;
 
     @Column()
-    password: string;
+    password?: string;
 
     @Column({default: 'bio'})
     bio: string;

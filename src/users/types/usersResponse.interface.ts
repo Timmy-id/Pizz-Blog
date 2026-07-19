@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
-import { IUser } from './users.type';
+import { UserType } from './users.type';
 
 export interface IUserResponse{
-  user: IUser & { token: string };
+  user: UserType & { token: string };
 }

@@ -7,9 +7,10 @@ import { TypeOrmModule } from './datasource/typeorm.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ArticleModule } from './article/article.module';
+import { ProfilesModule } from './profiles/profiles.module';
 
 @Module({
-  imports: [TypeOrmModule, TagsModule, UsersModule, AuthModule, ArticleModule],
+  imports: [TypeOrmModule, TagsModule, UsersModule, AuthModule, ArticleModule, ProfilesModule],
   controllers: [AppController],
   providers: [AppService],
 })
