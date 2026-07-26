@@ -1,34 +1,66 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-import { ArticleEntity } from "@/article/article.entity";
-import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { ArticleEntity } from '@/article/article.entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
-
-@Entity({name: 'users'})
+@Entity({ name: 'users' })
 export class UsersEntity {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    @Column({ name: 'username', nullable: false })
-    username: string;
+  @Column({ unique: true })
+  username: string;
 
-    @Column()
-    email?: string;
+  @Column({ unique: true })
+  email?: string;
 
-    @Column()
-    password?: string;
+  @Column()
+  password?: string;
 
-    @Column({default: 'bio'})
-    bio: string;
+  @Column({ default: 'bio' })
+  bio: string;
 
-    @Column({default: ''})
-    image: string;
+  @Column({ default: '' })
+  image: string;
 
-    @ManyToMany(() => ArticleEntity)
-    @JoinTable()
-    favorites: ArticleEntity[]
+  @Column({ default: false })
+  isVerified: boolean;
 
-    @OneToMany(() => ArticleEntity, (article) => article.author)
-    articles: ArticleEntity[]
+  @Column({ default: null, nullable: true })
+  verificationToken: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  verificationTokenExpiresAt?: Date;
+
+  @Column({ default: '' })
+  resetToken: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  resetTokenExpiresAt: Date;
+
+  @Column({ default: '' })
+  refreshToken: string;
+
+  @ManyToMany(() => ArticleEntity)
+  @JoinTable()
+  favorites: ArticleEntity[];
+
+  @OneToMany(() => ArticleEntity, (article) => article.author)
+  articles: ArticleEntity[];
+
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updatedAt: Date;
 }

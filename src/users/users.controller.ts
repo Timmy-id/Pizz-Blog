@@ -10,17 +10,20 @@ import { UpdateUserDto } from './dto/updateUser.dto';
 
 @Controller('users')
 export class UsersController {
-    constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) {}
 
-    @Get('me')
-    @UseGuards(AuthGuard)
-    getCurrentUser(@User() user): IUserResponse {
-        return this.usersService.generateUserResponse(user!)
-    }
+  @Get('me')
+  @UseGuards(AuthGuard)
+  async getCurrentUser(@User() user): Promise<IUserResponse> {
+    return await this.usersService.generateUserResponse(user!);
+  }
 
-    @Put()
-    @UseGuards(AuthGuard)
-    async updateUser(@User('id') userId: string, @Body('user') updateUserDto: UpdateUserDto): Promise<IUserResponse> {
-        return this.usersService.updateUser(userId, updateUserDto)
-    }
+  @Put()
+  @UseGuards(AuthGuard)
+  async updateUser(
+    @User('id') userId: string,
+    @Body('user') updateUserDto: UpdateUserDto,
+  ): Promise<IUserResponse> {
+    return this.usersService.updateUser(userId, updateUserDto);
+  }
 }
