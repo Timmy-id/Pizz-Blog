@@ -6,10 +6,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class TagsService {
-  constructor(@InjectRepository(TagsEntity) private readonly tagRepository: Repository<TagsEntity>) {}
+  constructor(
+    @InjectRepository(TagsEntity)
+    private readonly tagRepository: Repository<TagsEntity>,
+  ) {}
   async getAll() {
-    const allTags = await this.tagRepository.find()
-    const tags: string[] = allTags.map(tag => tag.name)
+    const allTags = await this.tagRepository.find();
+    const tags: string[] = allTags.map((tag) => tag.name);
     return { tags };
   }
 }

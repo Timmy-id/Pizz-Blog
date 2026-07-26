@@ -13,15 +13,18 @@ export class ProfilesController {
 
   @Get(':username')
   async getProfile(@Param('username') profileUsername: string) {
-    return await this.profilesService.getProfile(profileUsername)
+    return await this.profilesService.getProfile(profileUsername);
   }
 
   @Post(':username/follow')
   @UseGuards(AuthGuard)
   async followProfile(
     @User('id') currentUserId: string,
-    @Param('username') followingUsername: string
+    @Param('username') followingUsername: string,
   ): Promise<IProfileResponse> {
-    return await this.profilesService.followProfile(currentUserId, followingUsername)
+    return await this.profilesService.followProfile(
+      currentUserId,
+      followingUsername,
+    );
   }
 }

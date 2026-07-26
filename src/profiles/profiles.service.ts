@@ -23,55 +23,61 @@ export class ProfilesService {
 
   async getProfile(profileUsername: string): Promise<IProfileResponse> {
     const profile = await this.userRepository.findOne({
-        where: { username: profileUsername }
-    })
+      where: { username: profileUsername },
+    });
 
-    if(!profile) {
-        throw new HttpException('Profile not found', HttpStatus.NOT_FOUND)
+    if (!profile) {
+      throw new HttpException('Profile not found', HttpStatus.NOT_FOUND);
     }
 
-    return this.generateProfileResponse(profile)
+    return this.generateProfileResponse(profile);
   }
 
-  async followProfile(currentUserId: string, followingUsername: string): Promise<IProfileResponse> {
+  async followProfile(
+    currentUserId: string,
+    followingUsername: string,
+  ): Promise<IProfileResponse> {
     const followingProfile = await this.userRepository.findOne({
-        where: { username: followingUsername }
-    })
+      where: { username: followingUsername },
+    });
 
     if (!followingProfile) {
-        throw new HttpException('Profile does not exist', HttpStatus.NOT_FOUND)
+      throw new HttpException('Profile does not exist', HttpStatus.NOT_FOUND);
     }
 
     if (currentUserId === followingProfile.id) {
-        throw new HttpException("You can't follow yourself", HttpStatus.BAD_REQUEST)
+      throw new HttpException(
+        "You can't follow yourself",
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const follow = await this.followRepository.findOne({
-        where: { 
-            followerId: currentUserId,
-            followingId: followingProfile.id
-        }
-    })
+      where: {
+        followerId: currentUserId,
+        followingId: followingProfile.id,
+      },
+    });
 
     if (!follow) {
-        const newFollow = new FollowEntity()
-        newFollow.followerId = currentUserId
-        newFollow.followingId = followingProfile.id
-        await this.followRepository.save(newFollow)
+      const newFollow = new FollowEntity();
+      newFollow.followerId = currentUserId;
+      newFollow.followingId = followingProfile.id;
+      await this.followRepository.save(newFollow);
     }
-    const profile = { ...followingProfile, following: true }
-    return this.generateProfileResponse(profile)
+    const profile = { ...followingProfile, following: true };
+    return this.generateProfileResponse(profile);
   }
 
   generateProfileResponse(profile: UsersEntity): IProfileResponse {
-    delete profile?.password
-    delete profile?.email
+    delete profile?.password;
+    delete profile?.email;
 
     const profileResponse: ProfileType = {
       ...profile,
       following: false,
-    }
+    };
 
-    return { profile: profileResponse }
+    return { profile: profileResponse };
   }
 }

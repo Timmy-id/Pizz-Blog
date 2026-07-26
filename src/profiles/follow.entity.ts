@@ -1,14 +1,14 @@
 /* eslint-disable prettier/prettier */
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity({name: 'follows'})
+@Entity({ name: 'follows' })
 export class FollowEntity {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    @Column()
-    followerId: string;
+  @Column()
+  followerId: string;
 
-    @Column()
-    followingId: string;
+  @Column()
+  followingId: string;
 }

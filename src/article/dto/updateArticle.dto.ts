@@ -1,10 +1,10 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable prettier/prettier */
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class UpdateArticleDto {
-    @IsOptional()
+  @IsOptional()
   @IsString()
   @IsNotEmpty({ message: 'Title cannot be empty' })
   title: string;
